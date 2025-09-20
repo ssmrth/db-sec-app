@@ -1,4 +1,5 @@
 node_modules
+logs
 frontend/node_modules
 .env
 reports/*.pdf
@@ -15,6 +16,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
 
 # OS
 .DS_Store
