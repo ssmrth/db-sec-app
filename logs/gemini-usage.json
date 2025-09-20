@@ -1,0 +1,12 @@
+{
+  "dailyUsage": {
+    "2025-09-20": {
+      "requests": 19,
+      "inputTokens": 6394,
+      "outputTokens": 6826,
+      "totalTokens": 34370
+    }
+  },
+  "totalRequests": 19,
+  "lastReset": "2025-09-20T15:13:33.742Z"
+}
