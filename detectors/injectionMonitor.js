@@ -13,40 +13,52 @@ function detectInjection(doc) {
 }
 
 function watchCollection() {
-  const changeStream = db.collection('users').watch(); 
+  let lastCheckTime = new Date();
+  
+  // Polling approach for standalone MongoDB
+  const pollInterval = setInterval(async () => {
+    try {
+      const recentDocs = await db.collection('users').find({
+        _id: { $gt: new mongoose.Types.ObjectId(Math.floor(lastCheckTime.getTime() / 1000).toString(16) + "0000000000000000") }
+      }).toArray();
 
-  changeStream.on('change', async (change) => {
-    if (change.operationType === 'insert') {
-      const fullDocument = change.fullDocument;
+      for (const doc of recentDocs) {
+        if (detectInjection(doc)) {
+          console.log('[!] Injection attack detected!');
 
-      if (detectInjection(fullDocument)) {
-        console.log('[!] Injection attack detected!');
-
-        // Save to DB
-        const newLog = new AttackLog({
-          attackType: 'NoSQL Injection',
-          details: fullDocument,
-          timestamp: new Date()
-        });
-        await newLog.save();
-
-        // Generate report
-        const reportPath = await generateReport(fullDocument);
-
-        // Send email with attachment
-        await sendAlert(
-          {
-            detectedAt: new Date().toISOString(),
-            collection: 'users',
+          // Save to DB
+          const newLog = new AttackLog({
             attackType: 'NoSQL Injection',
-          },
-          reportPath
-        );
-      }
-    }
-  });
+            details: doc,
+            timestamp: new Date()
+          });
+          await newLog.save();
 
-  console.log('👀 Watching collection for changes...');
+          // Generate report
+          const reportPath = await generateReport(doc);
+
+          // Send email with attachment
+          await sendAlert(
+            {
+              detectedAt: new Date().toISOString(),
+              collection: 'users',
+              attackType: 'NoSQL Injection',
+            },
+            reportPath
+          );
+        }
+      }
+      
+      lastCheckTime = new Date();
+    } catch (error) {
+      console.error('Error polling collection:', error.message);
+    }
+  }, 5000); // Check every 5 seconds
+
+  console.log('👀 Polling collection for changes every 5 seconds...');
+  
+  // Return cleanup function
+  return () => clearInterval(pollInterval);
 }
 
 module.exports = {

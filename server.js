@@ -12,8 +12,15 @@ app.use(express.json());
 app.use(helmet());
 
 connectDB().then(() => {
-  watchCollection();
+  const cleanup = watchCollection();
   console.log('Watching MongoDB changes...');
+  
+  // Handle graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('\nShutting down gracefully...');
+    if (cleanup) cleanup();
+    process.exit(0);
+  });
 });
 
 const PORT = process.env.PORT || 3000;
