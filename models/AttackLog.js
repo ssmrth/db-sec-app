@@ -9,6 +9,8 @@ const attackLogSchema = new mongoose.Schema({
   collection: String,
   attackType: String,
   rawData: mongoose.Schema.Types.Mixed,
+}, {
+  suppressReservedKeysWarning: true
 });
 
 module.exports = mongoose.model("AttackLog", attackLogSchema);

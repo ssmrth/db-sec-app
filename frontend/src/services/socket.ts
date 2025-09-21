@@ -17,7 +17,7 @@ class SocketService {
       return;
     }
 
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:3000';
+    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8080';
     
     this.socket = io(socketUrl, {
       transports: ['websocket'],

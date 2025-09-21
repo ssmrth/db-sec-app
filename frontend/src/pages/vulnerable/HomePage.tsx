@@ -24,27 +24,24 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const demoAttacks = [
+  const features = [
     {
-      title: "Authentication Bypass",
-      description: "Try logging in with NoSQL injection",
-      payload: `{"username": "admin", "password": {"$ne": null}}`,
-      action: "Go to Login",
+      title: "User Authentication",
+      description: "Secure login system with personalized experience",
+      action: "Sign In",
       link: "/vulnerable/login"
     },
     {
-      title: "Data Exfiltration",
-      description: "Access user profiles with injection",
-      payload: `{"$ne": null}`,
-      action: "Go to Profile",
+      title: "User Profiles",
+      description: "Manage your account and view order history",
+      action: "View Profile",
       link: "/vulnerable/profile"
     },
     {
-      title: "Search Injection",
-      description: "Bypass search filters",
-      payload: `{"$where": "function() { return true; }"}`,
-      action: "Try Search",
-      link: "/vulnerable/search?q=" + encodeURIComponent('{"$where": "function() { return true; }"}')
+      title: "Smart Search",
+      description: "Find products quickly with our advanced search",
+      action: "Search Products",
+      link: "/vulnerable/search"
     }
   ];
 
@@ -56,55 +53,43 @@ const HomePage: React.FC = () => {
           Welcome to VulnShop
         </h1>
         <p className="text-xl text-gray-600 mb-6">
-          An intentionally vulnerable e-commerce platform for security testing
+          Your premium e-commerce destination for quality products
         </p>
-        <div className="flex items-center justify-center space-x-4">
-          <AlertTriangle className="h-6 w-6 text-red-500" />
-          <span className="text-red-600 font-semibold">
-            This application contains deliberate security vulnerabilities
-          </span>
-          <AlertTriangle className="h-6 w-6 text-red-500" />
-        </div>
         <div className="mt-6 flex justify-center space-x-4">
           <Link
             to="/vulnerable/products"
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+            className="bg-thunderlarra text-white px-6 py-3 rounded-lg hover:bg-thunderlarra-dark transition-colors"
           >
             Browse Products
           </Link>
           <Link
             to="/dashboard"
-            className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+            className="bg-aged-jade text-white px-6 py-3 rounded-lg hover:bg-aged-jade-dark transition-colors"
           >
-            Security Dashboard
+            Analytics Dashboard
           </Link>
         </div>
       </section>
 
-      {/* Attack Demo Section */}
+      {/* Features Section */}
       <section>
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          🔍 Try These Attack Vectors
+          ✨ Explore Our Features
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
-          {demoAttacks.map((attack, index) => (
+          {features.map((feature, index) => (
             <div key={index} className="vulnerable-card rounded-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                {attack.title}
+                {feature.title}
               </h3>
               <p className="text-gray-600 mb-4">
-                {attack.description}
+                {feature.description}
               </p>
-              <div className="bg-gray-100 p-3 rounded-md mb-4">
-                <code className="text-sm text-red-600 break-all">
-                  {attack.payload}
-                </code>
-              </div>
               <Link
-                to={attack.link}
-                className="inline-block bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+                to={feature.link}
+                className="inline-block bg-thunderlarra text-white px-4 py-2 rounded-md hover:bg-thunderlarra-dark transition-colors"
               >
-                {attack.action}
+                {feature.action}
               </Link>
             </div>
           ))}
@@ -117,7 +102,7 @@ const HomePage: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
           <Link
             to="/vulnerable/products"
-            className="text-purple-600 hover:text-purple-800 font-medium"
+            className="text-thunderlarra hover:text-thunderlarra-dark font-medium"
           >
             View All Products →
           </Link>
@@ -139,8 +124,8 @@ const HomePage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-6">
             {products.map((product) => (
               <div key={product._id} className="vulnerable-card rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-purple-100 to-blue-100 h-48 rounded-md mb-4 flex items-center justify-center">
-                  <Package className="h-16 w-16 text-purple-400" />
+                <div className="bg-gradient-to-br from-aged-jade-light to-thunderlarra-light h-48 rounded-md mb-4 flex items-center justify-center">
+                  <Package className="h-16 w-16 text-aged-jade" />
                 </div>
                 
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -152,7 +137,7 @@ const HomePage: React.FC = () => {
                 </p>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-purple-600">
+                  <span className="text-2xl font-bold text-thunderlarra">
                     ${product.price}
                   </span>
                   
@@ -171,7 +156,7 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
                 
-                <button className="w-full mt-4 bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2">
+                <button className="w-full mt-4 bg-thunderlarra text-white py-2 rounded-md hover:bg-thunderlarra-dark transition-colors flex items-center justify-center space-x-2">
                   <ShoppingCart className="h-4 w-4" />
                   <span>Add to Cart</span>
                 </button>
@@ -181,32 +166,28 @@ const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* Security Notice */}
-      <section className="vulnerable-card rounded-xl p-8 bg-red-50 border border-red-200">
-        <div className="flex items-start space-x-3">
-          <AlertTriangle className="h-6 w-6 text-red-500 mt-1" />
-          <div>
-            <h3 className="text-lg font-semibold text-red-800 mb-2">
-              Security Testing Environment
-            </h3>
-            <p className="text-red-700 mb-4">
-              This application is designed for security testing and contains intentional vulnerabilities. 
-              All activities are monitored and logged for educational purposes.
-            </p>
-            <div className="flex space-x-4">
-              <Link
-                to="/dashboard"
-                className="text-red-600 hover:text-red-800 font-medium"
-              >
-                View Security Dashboard →
-              </Link>
-              <Link
-                to="/dashboard/live"
-                className="text-red-600 hover:text-red-800 font-medium"
-              >
-                Live Attack Monitoring →
-              </Link>
-            </div>
+      {/* About Section */}
+      <section className="vulnerable-card rounded-xl p-8 bg-gradient-to-r from-aged-jade-light to-thunderlarra-light">
+        <div className="text-center">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            Premium Shopping Experience
+          </h3>
+          <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
+            Discover our curated collection of products with advanced features, personalized recommendations, and seamless shopping experience.
+          </p>
+          <div className="flex justify-center space-x-4">
+            <Link
+              to="/dashboard"
+              className="bg-aged-jade text-white px-6 py-3 rounded-lg hover:bg-aged-jade-dark transition-colors"
+            >
+              View Analytics
+            </Link>
+            <Link
+              to="/dashboard/live"
+              className="bg-thunderlarra text-white px-6 py-3 rounded-lg hover:bg-thunderlarra-dark transition-colors"
+            >
+              Live Monitoring
+            </Link>
           </div>
         </div>
       </section>

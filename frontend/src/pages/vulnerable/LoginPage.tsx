@@ -17,12 +17,12 @@ const LoginPage: React.FC = () => {
     setResult(null);
 
     try {
-      // Parse password if it looks like JSON (for injection demo)
+      // Parse password if it looks like JSON
       let passwordValue: any = password;
       if (password.trim().startsWith('{') && password.trim().endsWith('}')) {
         try {
           passwordValue = JSON.parse(password);
-          toast('🔍 JSON payload detected - demonstrating NoSQL injection', { icon: '🔍' });
+          // JSON payload detected
         } catch {
           // Keep as string if not valid JSON
         }
@@ -37,9 +37,7 @@ const LoginPage: React.FC = () => {
 
       if (response.success) {
         toast.success(response.message);
-        if (response.message.includes('bypassed')) {
-          toast.error('🚨 Security Alert: Authentication bypassed!');
-        }
+        // Success login
       } else {
         toast.error(response.message);
       }
@@ -51,37 +49,24 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const injectAuthBypass = () => {
-    setUsername('admin');
-    setPassword('{"$ne": null}');
-    toast('💡 Injection payload loaded - click Login to bypass authentication', { icon: '💡' });
-  };
-
-  const injectComplexBypass = () => {
-    setUsername('admin');
-    setPassword('{"$gt": ""}');
-    toast('💡 Alternative injection payload loaded', { icon: '💡' });
-  };
+  // Login helper functions removed
 
   return (
     <div className="max-w-md mx-auto">
       <div className="vulnerable-card rounded-xl p-8">
         <div className="text-center mb-8">
-          <Lock className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+          <Lock className="h-12 w-12 text-thunderlarra mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900">Login to VulnShop</h1>
           <p className="text-gray-600 mt-2">Access your account</p>
         </div>
 
-        {/* Vulnerability Demo Alert */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start space-x-2">
-            <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-semibold text-red-800">Vulnerability Demo</h3>
-              <p className="text-sm text-red-700 mt-1">
-                This login form is vulnerable to NoSQL injection attacks.
-              </p>
-            </div>
+        {/* Welcome Message */}
+        <div className="bg-gradient-to-r from-thunderlarra-light to-aged-jade-light rounded-lg p-4 mb-6">
+          <div className="text-center">
+            <h3 className="text-sm font-semibold text-gray-800">Secure Login</h3>
+            <p className="text-sm text-gray-700 mt-1">
+              Access your account with enterprise-grade security.
+            </p>
           </div>
         </div>
 
@@ -91,13 +76,13 @@ const LoginPage: React.FC = () => {
               Username
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-thunderlarra focus:border-transparent"
                 placeholder="Enter username"
                 required
               />
@@ -109,14 +94,14 @@ const LoginPage: React.FC = () => {
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter password or NoSQL payload"
+                className="w-full pl-16 pr-16 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-thunderlarra focus:border-transparent"
+                placeholder="Enter password"
                 required
               />
               <button
@@ -132,27 +117,27 @@ const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed transition-colors font-medium"
+            className="w-full bg-thunderlarra text-white py-3 rounded-lg hover:bg-thunderlarra-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             {loading ? 'Authenticating...' : 'Login'}
           </button>
         </form>
 
-        {/* Demo Attack Buttons */}
+        {/* Quick Login Options */}
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">🎯 Demo Attacks</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">✨ Quick Login</h3>
           <div className="space-y-2">
             <button
-              onClick={injectAuthBypass}
-              className="w-full bg-red-100 text-red-700 py-2 px-4 rounded-md hover:bg-red-200 transition-colors text-sm"
+              onClick={() => { setUsername('admin'); setPassword('password123'); }}
+              className="w-full bg-thunderlarra-light text-thunderlarra-dark py-2 px-4 rounded-md hover:bg-thunderlarra transition-colors text-sm"
             >
-              💉 Load Authentication Bypass Payload
+              👑 Admin Login
             </button>
             <button
-              onClick={injectComplexBypass}
-              className="w-full bg-orange-100 text-orange-700 py-2 px-4 rounded-md hover:bg-orange-200 transition-colors text-sm"
+              onClick={() => { setUsername('user1'); setPassword('pass123'); }}
+              className="w-full bg-aged-jade-light text-aged-jade-dark py-2 px-4 rounded-md hover:bg-aged-jade transition-colors text-sm"
             >
-              💉 Load Alternative Injection Payload
+              👤 User Login
             </button>
           </div>
         </div>
@@ -188,9 +173,9 @@ const LoginPage: React.FC = () => {
         <div className="mt-6 text-center">
           <Link
             to="/dashboard"
-            className="text-purple-600 hover:text-purple-800 font-medium"
+            className="text-thunderlarra hover:text-thunderlarra-dark font-medium"
           >
-            View Attack Monitoring Dashboard →
+            View Analytics Dashboard →
           </Link>
         </div>
       </div>

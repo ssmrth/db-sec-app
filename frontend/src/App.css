@@ -5,6 +5,18 @@
   box-sizing: border-box;
 }
 
+/* Color Palette */
+:root {
+  --thunderlarra: #e88577;
+  --thunderlarra-dark: #d66b5a;
+  --thunderlarra-light: #f0a898;
+  --aged-jade: #6d6858;
+  --aged-jade-dark: #5a5446;
+  --aged-jade-light: #8a8270;
+  --black-wash: #0d0d0d;
+  --black-wash-light: #2a2a2a;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -12,7 +24,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
-  color: #374151;
+  color: var(--black-wash);
+  background-color: #fafafa;
 }
 
 /* Utility Classes */
@@ -96,6 +109,64 @@ body {
 
 .rounded-xl {
   border-radius: 12px;
+}
+
+/* Remove all text underlines */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* Custom color classes */
+.bg-thunderlarra {
+  background-color: var(--thunderlarra);
+}
+
+.bg-thunderlarra-dark {
+  background-color: var(--thunderlarra-dark);
+}
+
+.bg-thunderlarra-light {
+  background-color: var(--thunderlarra-light);
+}
+
+.bg-aged-jade {
+  background-color: var(--aged-jade);
+}
+
+.bg-aged-jade-dark {
+  background-color: var(--aged-jade-dark);
+}
+
+.bg-aged-jade-light {
+  background-color: var(--aged-jade-light);
+}
+
+.text-thunderlarra {
+  color: var(--thunderlarra);
+}
+
+.text-thunderlarra-dark {
+  color: var(--thunderlarra-dark);
+}
+
+.text-aged-jade {
+  color: var(--aged-jade);
+}
+
+.hover\:bg-thunderlarra-dark:hover {
+  background-color: var(--thunderlarra-dark);
+}
+
+.hover\:bg-aged-jade-dark:hover {
+  background-color: var(--aged-jade-dark);
+}
+
+.hover\:text-thunderlarra-dark:hover {
+  color: var(--thunderlarra-dark);
 }
 
 .p-4 {
@@ -536,12 +607,35 @@ button,
 }
 
 .btn-primary {
-  background-color: #9333ea;
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--thunderlarra) 0%, var(--thunderlarra-dark) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
-  background-color: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(232, 133, 119, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--aged-jade) 0%, var(--aged-jade-dark) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(109, 104, 88, 0.4);
 }
 
 .btn-danger {
@@ -571,14 +665,21 @@ button,
 
 /* Vulnerability Demo Styles */
 .vulnerable-app {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--aged-jade-light) 0%, var(--thunderlarra-light) 100%);
   min-height: 100vh;
 }
 
 .vulnerable-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(109, 104, 88, 0.15);
+  transition: all 0.3s ease;
+}
+
+.vulnerable-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(109, 104, 88, 0.2);
 }
 
 /* Security Dashboard Styles */
@@ -606,19 +707,27 @@ button,
 
 /* Attack Severity Colors */
 .severity-critical {
-  @apply bg-red-100 text-red-800 border-red-200;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
 }
 
 .severity-high {
-  @apply bg-orange-100 text-orange-800 border-orange-200;
+  background-color: #fff7ed;
+  color: #9a3412;
+  border-color: #fed7aa;
 }
 
 .severity-medium {
-  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  background-color: #fefce8;
+  color: #a16207;
+  border-color: #fde047;
 }
 
 .severity-low {
-  @apply bg-green-100 text-green-800 border-green-200;
+  background-color: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
 }
 
 /* Live monitoring animations */
@@ -678,9 +787,12 @@ button,
 
 /* Navigation active states */
 .nav-active {
-  @apply bg-blue-100 text-blue-700 border-blue-300;
+  background-color: var(--thunderlarra-light);
+  color: var(--thunderlarra-dark);
+  border-color: var(--thunderlarra);
 }
 
 .dashboard-nav-active {
-  @apply bg-slate-700 text-white;
+  background-color: var(--thunderlarra);
+  color: white;
 }
