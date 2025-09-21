@@ -75,6 +75,27 @@ function watchCollection() {
               );
 
               console.log(`✅ Attack ${docId} processed successfully`);
+
+              // Emit real-time attack data to frontend
+              if (global.io) {
+                const attackData = {
+                  id: docId,
+                  timestamp: new Date().toISOString(),
+                  type: 'NoSQL Injection',
+                  severity: determineSeverity(doc),
+                  payload: JSON.stringify(doc),
+                  collection: 'users',
+                  blocked: true,
+                  description: generateDescription(doc)
+                };
+                
+                global.io.emit('new-attack', attackData);
+                global.io.emit('metrics-update', {
+                  attacksToday: await AttackLog.countDocuments({
+                    detectedAt: { $gte: new Date().setHours(0, 0, 0, 0) }
+                  })
+                });
+              }
             } else {
               console.log(`⚠️ Attack ${docId} already exists in database - skipping`);
             }
@@ -106,6 +127,25 @@ function watchCollection() {
   
   // Return cleanup function
   return () => clearInterval(pollInterval);
+}
+
+// Helper functions for real-time data
+function determineSeverity(rawData) {
+  const dataStr = JSON.stringify(rawData);
+  if (dataStr.includes('$where') || dataStr.includes('$eval')) return 'critical';
+  if (dataStr.includes('$ne') && dataStr.includes('$gt')) return 'high';
+  if (dataStr.includes('$ne') || dataStr.includes('$gt')) return 'medium';
+  return 'low';
+}
+
+function generateDescription(rawData) {
+  const dataStr = JSON.stringify(rawData);
+  if (dataStr.includes('$where')) return 'JavaScript code injection attempt';
+  if (dataStr.includes('$ne') && dataStr.includes('password')) return 'Authentication bypass attempt';
+  if (dataStr.includes('$gt') && dataStr.includes('$ne')) return 'Complex query injection';
+  if (dataStr.includes('$ne')) return 'Not-equal operator injection';
+  if (dataStr.includes('$gt')) return 'Greater-than operator injection';
+  return 'NoSQL injection attempt detected';
 }
 
 module.exports = {

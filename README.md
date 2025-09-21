@@ -94,8 +94,45 @@ The system uses Google Gemini 2.0 Flash to generate comprehensive security repor
 ├── alerts/           # Email alert functionality
 ├── config/           # Database configuration
 ├── detectors/        # NoSQL injection detection logic
+├── frontend/         # React frontend application
 ├── models/           # MongoDB schemas
 ├── reports/          # PDF report generation
+├── routes/           # API routes for frontend integration
 ├── services/         # AI service integration
+├── scripts/          # Utility scripts
+├── utils/            # Helper utilities
 └── logs/            # Activity logs
 ```
+
+## Frontend Application
+
+The system now includes a comprehensive React frontend with:
+
+### 🛒 **Vulnerable E-commerce Demo** (`/frontend`)
+- Interactive vulnerable application for security testing
+- Real NoSQL injection examples and demonstrations
+- Educational hints and attack payload examples
+
+### 🛡️ **Security Dashboard**
+- Real-time attack monitoring with Socket.io
+- Professional security dashboard interface
+- Live metrics and attack analytics
+- Incident reporting and alert management
+
+### 🚀 **Quick Start**
+```bash
+# Start both backend and frontend
+./start-demo.sh
+
+# Or manually:
+# Terminal 1 - Backend
+npm start
+
+# Terminal 2 - Frontend
+cd frontend && npm start
+```
+
+### 📍 **Access Points**
+- **Vulnerable App**: http://localhost:3001/vulnerable
+- **Security Dashboard**: http://localhost:3001/dashboard
+- **Backend API**: http://localhost:3000
