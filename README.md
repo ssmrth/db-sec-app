@@ -1,4 +1,4 @@
-# NoSQL Security Monitor
+# NoSQL Security Monito
 
 A real-time NoSQL injection detection and reporting system with AI-powered incident analysis.
 
