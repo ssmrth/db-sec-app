@@ -1,18 +1,12 @@
 {
   "dailyUsage": {
-    "2025-09-20": {
-      "requests": 20,
-      "inputTokens": 7289,
-      "outputTokens": 9186,
-      "totalTokens": 39263
-    },
-    "2025-09-21": {
-      "requests": 3,
-      "inputTokens": 2692,
-      "outputTokens": 5846,
-      "totalTokens": 14684
+    "2025-10-25": {
+      "requests": 6,
+      "inputTokens": 5356,
+      "outputTokens": 13957,
+      "totalTokens": 29344
     }
   },
-  "totalRequests": 23,
+  "totalRequests": 30,
   "lastReset": "2025-09-20T15:13:33.742Z"
 }

@@ -47,31 +47,31 @@ const DashboardLayout: React.FC = () => {
     <div className="dashboard-bg min-h-screen">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-slate-800 min-h-screen">
+        <div className="w-64 bg-black min-h-screen border-r border-gray-800">
           {/* Logo */}
-          <div className="p-6 border-b border-slate-700">
+          <div className="p-6 border-b border-gray-800">
             <Link to="/dashboard" className="flex items-center space-x-3">
-              <Shield className="h-8 w-8 text-blue-400" />
+              <Shield className="h-8 w-8 text-thunderlarra" />
               <div>
                 <h1 className="text-white text-lg font-bold">Security Center</h1>
-                <p className="text-slate-400 text-xs">NoSQL Monitor</p>
+                <p className="text-gray-400 text-xs">NoSQL Monitor</p>
               </div>
             </Link>
           </div>
 
           {/* Connection Status */}
-          <div className="p-4 border-b border-slate-700">
+          <div className="p-4 border-b border-gray-800">
             <div className="flex items-center space-x-2">
               {isConnected ? (
                 <>
                   <Wifi className="h-4 w-4 text-green-400" />
-                  <span className="text-green-400 text-sm">Connected</span>
+                  <span className="text-green-400 text-sm font-medium">Connected</span>
                   <div className="h-2 w-2 bg-green-400 rounded-full pulse-dot"></div>
                 </>
               ) : (
                 <>
                   <WifiOff className="h-4 w-4 text-red-400" />
-                  <span className="text-red-400 text-sm">Disconnected</span>
+                  <span className="text-red-400 text-sm font-medium">Disconnected</span>
                 </>
               )}
             </div>
@@ -90,8 +90,8 @@ const DashboardLayout: React.FC = () => {
                   to={item.href}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-slate-700 text-white'
-                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                      ? 'dashboard-nav-active'
+                      : 'text-white hover:bg-gray-900 hover:text-thunderlarra'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -102,19 +102,19 @@ const DashboardLayout: React.FC = () => {
           </nav>
 
           {/* Quick Actions */}
-          <div className="p-4 border-t border-slate-700 mt-auto">
-            <h3 className="text-slate-400 text-xs font-semibold uppercase mb-3">Quick Actions</h3>
+          <div className="p-4 border-t border-gray-800 mt-auto">
+            <h3 className="text-gray-400 text-xs font-semibold uppercase mb-3">Quick Actions</h3>
             <div className="space-y-2">
               <Link
                 to="/vulnerable"
-                className="flex items-center space-x-2 text-slate-300 hover:text-white text-sm"
+                className="flex items-center space-x-2 text-white hover:text-thunderlarra text-sm transition-colors"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span>Vulnerable App</span>
               </Link>
               <Link
                 to="/dashboard/live"
-                className="flex items-center space-x-2 text-slate-300 hover:text-white text-sm"
+                className="flex items-center space-x-2 text-white hover:text-thunderlarra text-sm transition-colors"
               >
                 <Eye className="h-4 w-4" />
                 <span>Live Monitor</span>

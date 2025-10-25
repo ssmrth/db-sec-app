@@ -49,6 +49,49 @@ export interface User {
   role: string;
 }
 
+export interface AlertRecipient {
+  _id: string;
+  email: string;
+  name: string;
+  role: 'admin' | 'security_analyst' | 'developer' | 'viewer';
+  isActive: boolean;
+  permissions: {
+    receiveAlerts: boolean;
+    viewReports: boolean;
+    manageAlerts: boolean;
+    manageSettings: boolean;
+  };
+  createdAt: Date;
+  lastNotified: Date | null;
+}
+
+export interface Report {
+  filename: string;
+  timestamp: number;
+  date: Date;
+  size: number;
+  path: string;
+}
+
+export interface SystemSetting {
+  value: any;
+  category: string;
+  description: string;
+  updatedAt: Date;
+}
+
+export interface DetailedAttack {
+  id: string;
+  timestamp: Date;
+  collection: string;
+  attackType: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  payload: any;
+  payloadString: string;
+  description: string;
+  blocked: boolean;
+}
+
 // Dashboard API calls
 export const dashboardApi = {
   // Get dashboard metrics
@@ -136,6 +179,82 @@ export const vulnerableApi = {
     categories: string[];
   }> => {
     const response = await api.get('/api/vulnerable/categories');
+    return response.data;
+  },
+};
+
+// Alert Recipients API
+export const alertsApi = {
+  // Get all recipients
+  getRecipients: async (): Promise<{ recipients: AlertRecipient[] }> => {
+    const response = await api.get('/api/alerts/recipients');
+    return response.data;
+  },
+
+  // Add new recipient
+  addRecipient: async (recipient: Partial<AlertRecipient>): Promise<{ recipient: AlertRecipient; message: string }> => {
+    const response = await api.post('/api/alerts/recipients', recipient);
+    return response.data;
+  },
+
+  // Update recipient
+  updateRecipient: async (id: string, updates: Partial<AlertRecipient>): Promise<{ recipient: AlertRecipient; message: string }> => {
+    const response = await api.put(`/api/alerts/recipients/${id}`, updates);
+    return response.data;
+  },
+
+  // Delete recipient
+  deleteRecipient: async (id: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/api/alerts/recipients/${id}`);
+    return response.data;
+  },
+};
+
+// Reports API
+export const reportsApi = {
+  // Get all reports
+  getReports: async (): Promise<{ reports: Report[]; total: number }> => {
+    const response = await api.get('/api/reports');
+    return response.data;
+  },
+
+  // Download report
+  downloadReport: (filename: string): string => {
+    return `${API_BASE_URL}/api/reports/download/${filename}`;
+  },
+
+  // Delete report
+  deleteReport: async (filename: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/api/reports/${filename}`);
+    return response.data;
+  },
+};
+
+// Settings API
+export const settingsApi = {
+  // Get all settings
+  getSettings: async (): Promise<{ settings: Record<string, SystemSetting> }> => {
+    const response = await api.get('/api/settings');
+    return response.data;
+  },
+
+  // Update setting
+  updateSetting: async (key: string, value: any, category?: string, description?: string): Promise<{ setting: any; message: string }> => {
+    const response = await api.put(`/api/settings/${key}`, { value, category, description });
+    return response.data;
+  },
+};
+
+// Analytics API
+export const analyticsApi = {
+  // Get detailed attacks for analytics
+  getDetailedAttacks: async (limit = 50, page = 1): Promise<{
+    attacks: DetailedAttack[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> => {
+    const response = await api.get(`/api/analytics/attacks?limit=${limit}&page=${page}`);
     return response.data;
   },
 };

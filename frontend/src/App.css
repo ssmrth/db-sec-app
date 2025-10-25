@@ -684,7 +684,7 @@ button,
 
 /* Security Dashboard Styles */
 .dashboard-bg {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: #000000;
   min-height: 100vh;
 }
 

@@ -81,7 +81,7 @@ The system automatically manages Google Gemini's free tier limits:
 
 ## AI-Powered Reports
 
-The system uses Google Gemini 2.0 Flash to generate comprehensive security reports that include:
+The system uses Google Gemini 2.5 Flash to generate comprehensive security reports that include:
 
 - **Executive Summary**: Brief overview and impact assessment
 - **Attack Details**: Technical analysis of the injection attempt
