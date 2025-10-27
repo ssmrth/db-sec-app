@@ -30,7 +30,8 @@ const DashboardLayout: React.FC = () => {
     
     return () => {
       unsubscribe();
-      socketService.disconnect();
+      // Don't disconnect on unmount - keep connection alive for other dashboard pages
+      // socketService.disconnect();
     };
   }, []);
 
