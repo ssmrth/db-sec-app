@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Plus, Trash2, Edit2, Mail, Shield, User, Eye } from 'lucide-react';
+import { Bell, Plus, Trash2, Edit2, Mail, Shield, User, Eye, X, FileText, Settings } from 'lucide-react';
 import { alertsApi, AlertRecipient } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -129,13 +129,13 @@ const AlertsManagement: React.FC = () => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'security_analyst':
-        return 'bg-thunderlarra-light text-thunderlarra-dark border-thunderlarra';
+        return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
       case 'developer':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
   };
 
@@ -175,128 +175,120 @@ const AlertsManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="dashboard-card rounded-lg p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Bell className="h-6 w-6 text-thunderlarra" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Alerts Management</h1>
-              <p className="text-sm text-gray-600">Manage email recipients and notification preferences</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center space-x-2 bg-thunderlarra text-white px-4 py-2 rounded-md hover:bg-thunderlarra-dark transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Recipient</span>
-          </button>
+      <div className="dashboard-card p-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Bell className="h-6 w-6 text-orange-500" />
+            Alert Distribution
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">Configure notification routing and access controls</p>
         </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 font-medium"
+        >
+          <Plus className="h-4 w-4" />
+          <span>New Recipient</span>
+        </button>
       </div>
 
       {/* Recipients List */}
-      <div className="dashboard-card rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Alert Recipients</h2>
-        
+      <div className="grid grid-cols-1 gap-6">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-thunderlarra mx-auto"></div>
-            <p className="text-gray-600 mt-4">Loading recipients...</p>
+          <div className="dashboard-card p-12 flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
         ) : recipients.length === 0 ? (
-          <div className="text-center py-12">
-            <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">No recipients configured</p>
+          <div className="dashboard-card p-12 text-center">
+            <Mail className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400 mb-4">No alert recipients configured</p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-thunderlarra text-white px-4 py-2 rounded-md hover:bg-thunderlarra-dark transition-colors"
+              className="text-blue-400 hover:text-blue-300 font-medium"
             >
-              Add First Recipient
+              Add your first recipient
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {recipients.map((recipient) => (
               <div
                 key={recipient._id}
-                className={`border rounded-lg p-4 ${
-                  recipient.isActive ? 'border-gray-200 bg-white' : 'border-gray-300 bg-gray-50 opacity-60'
+                className={`dashboard-card p-6 relative group border transition-all duration-200 ${
+                  recipient.isActive ? 'border-gray-800 hover:border-gray-700' : 'border-gray-800 opacity-60 bg-gray-900/20'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-semibold text-gray-900">{recipient.name}</h3>
-                      <span className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${getRoleColor(recipient.role)}`}>
-                        {getRoleIcon(recipient.role)}
-                        <span>{recipient.role.replace('_', ' ')}</span>
-                      </span>
-                      {!recipient.isActive && (
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                          Inactive
-                        </span>
-                      )}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${getRoleColor(recipient.role)}`}>
+                      {getRoleIcon(recipient.role)}
                     </div>
-                    
-                    <p className="text-sm text-gray-600 mb-3">
-                      <Mail className="inline h-4 w-4 mr-1" />
-                      {recipient.email}
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {recipient.permissions.receiveAlerts && (
-                        <span className="px-2 py-1 rounded text-xs bg-green-100 text-green-800">
-                          ✓ Receive Alerts
-                        </span>
-                      )}
-                      {recipient.permissions.viewReports && (
-                        <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
-                          ✓ View Reports
-                        </span>
-                      )}
-                      {recipient.permissions.manageAlerts && (
-                        <span className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800">
-                          ✓ Manage Alerts
-                        </span>
-                      )}
-                      {recipient.permissions.manageSettings && (
-                        <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-800">
-                          ✓ Manage Settings
-                        </span>
-                      )}
-                    </div>
-                    
-                    {recipient.lastNotified && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Last notified: {new Date(recipient.lastNotified).toLocaleString()}
+                    <div>
+                      <h3 className="font-bold text-white">{recipient.name}</h3>
+                      <p className="text-sm text-gray-400 flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {recipient.email}
                       </p>
-                    )}
+                    </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button
-                      onClick={() => handleToggleActive(recipient)}
-                      className={`px-3 py-1 rounded text-sm ${
-                        recipient.isActive
-                          ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                          : 'bg-green-200 text-green-700 hover:bg-green-300'
-                      }`}
-                    >
-                      {recipient.isActive ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <button
                       onClick={() => openEditModal(recipient)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteRecipient(recipient._id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded"
+                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {recipient.permissions.receiveAlerts && (
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-green-500/10 text-green-500 border border-green-500/20">
+                      <Bell className="h-3 w-3" />
+                      Receive Alerts
+                    </span>
+                  )}
+                  {recipient.permissions.viewReports && (
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                      <FileText className="h-3 w-3" />
+                      View Reports
+                    </span>
+                  )}
+                  {recipient.permissions.manageAlerts && (
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                      <Shield className="h-3 w-3" />
+                      Manage Alerts
+                    </span>
+                  )}
+                  {recipient.permissions.manageSettings && (
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-red-500/10 text-red-500 border border-red-500/20">
+                      <Settings className="h-3 w-3" />
+                      Manage Settings
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-800">
+                   <span className={`px-2 py-1 rounded text-xs font-bold border ${getRoleColor(recipient.role)}`}>
+                    {recipient.role.replace('_', ' ').toUpperCase()}
+                  </span>
+                  
+                  <button
+                    onClick={() => handleToggleActive(recipient)}
+                    className={`text-xs font-medium px-3 py-1 rounded-full border transition-colors ${
+                      recipient.isActive
+                        ? 'border-green-500/30 text-green-500 bg-green-500/10 hover:bg-green-500/20'
+                        : 'border-gray-600 text-gray-400 hover:text-white hover:border-gray-500'
+                    }`}
+                  >
+                    {recipient.isActive ? 'Active Account' : 'Activate Account'}
+                  </button>
                 </div>
               </div>
             ))}
@@ -306,149 +298,116 @@ const AlertsManagement: React.FC = () => {
 
       {/* Add/Edit Modal */}
       {(showAddModal || editingRecipient) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <form onSubmit={editingRecipient ? handleUpdateRecipient : handleAddRecipient}>
-              <div className="p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  {editingRecipient ? 'Edit Recipient' : 'Add New Recipient'}
-                </h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-thunderlarra focus:border-transparent"
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-thunderlarra focus:border-transparent"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Role *
-                    </label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => {
-                        const role = e.target.value as any;
-                        setFormData({
-                          ...formData,
-                          role,
-                          permissions: getRolePermissions(role)
-                        });
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-thunderlarra focus:border-transparent"
-                    >
-                      <option value="viewer">Viewer</option>
-                      <option value="developer">Developer</option>
-                      <option value="security_analyst">Security Analyst</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Role determines default permissions
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Permissions
-                    </label>
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions.receiveAlerts}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            permissions: { ...formData.permissions, receiveAlerts: e.target.checked }
-                          })}
-                          className="rounded border-gray-300 text-thunderlarra focus:ring-thunderlarra"
-                        />
-                        <span className="text-sm text-gray-700">Receive email alerts</span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions.viewReports}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            permissions: { ...formData.permissions, viewReports: e.target.checked }
-                          })}
-                          className="rounded border-gray-300 text-thunderlarra focus:ring-thunderlarra"
-                        />
-                        <span className="text-sm text-gray-700">View security reports</span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions.manageAlerts}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            permissions: { ...formData.permissions, manageAlerts: e.target.checked }
-                          })}
-                          className="rounded border-gray-300 text-thunderlarra focus:ring-thunderlarra"
-                        />
-                        <span className="text-sm text-gray-700">Manage alert recipients</span>
-                      </label>
-                      
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions.manageSettings}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            permissions: { ...formData.permissions, manageSettings: e.target.checked }
-                          })}
-                          className="rounded border-gray-300 text-thunderlarra focus:ring-thunderlarra"
-                        />
-                        <span className="text-sm text-gray-700">Manage system settings</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddModal(false);
-                      setEditingRecipient(null);
-                      resetForm();
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-thunderlarra text-white rounded-md hover:bg-thunderlarra-dark"
-                  >
-                    {editingRecipient ? 'Update Recipient' : 'Add Recipient'}
-                  </button>
-                </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-xl border border-gray-700 w-full max-w-md shadow-2xl">
+            <div className="p-6 border-b border-gray-800 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">
+                {editingRecipient ? 'Edit Recipient' : 'Add New Recipient'}
+              </h2>
+              <button 
+                onClick={() => {
+                  setShowAddModal(false);
+                  setEditingRecipient(null);
+                  resetForm();
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={editingRecipient ? handleUpdateRecipient : handleAddRecipient} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g. Sarah Connor"
+                />
               </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="sarah@cyberdyne.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">Role Assignment</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => {
+                    const role = e.target.value as any;
+                    setFormData({
+                      ...formData,
+                      role,
+                      permissions: getRolePermissions(role)
+                    });
+                  }}
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="viewer">Viewer (Read Only)</option>
+                  <option value="developer">Developer</option>
+                  <option value="security_analyst">Security Analyst</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+
+              <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-800 space-y-2">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Permissions</p>
+                <label className="flex items-center space-x-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions.receiveAlerts}
+                    onChange={(e) => setFormData({ ...formData, permissions: { ...formData.permissions, receiveAlerts: e.target.checked }})}
+                    className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span>Receive Alerts</span>
+                </label>
+                <label className="flex items-center space-x-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions.viewReports}
+                    onChange={(e) => setFormData({ ...formData, permissions: { ...formData.permissions, viewReports: e.target.checked }})}
+                    className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span>View Reports</span>
+                </label>
+                <label className="flex items-center space-x-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions.manageAlerts}
+                    onChange={(e) => setFormData({ ...formData, permissions: { ...formData.permissions, manageAlerts: e.target.checked }})}
+                    className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span>Manage Alerts</span>
+                </label>
+                <label className="flex items-center space-x-2 text-sm text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions.manageSettings}
+                    onChange={(e) => setFormData({ ...formData, permissions: { ...formData.permissions, manageSettings: e.target.checked }})}
+                    className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span>Manage Settings</span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-900/20"
+              >
+                {editingRecipient ? 'Update Recipient' : 'Create Recipient'}
+              </button>
             </form>
           </div>
         </div>

@@ -5,8 +5,14 @@
       "inputTokens": 5356,
       "outputTokens": 13957,
       "totalTokens": 29344
+    },
+    "2025-11-23": {
+      "requests": 2,
+      "inputTokens": 1793,
+      "outputTokens": 3211,
+      "totalTokens": 9789
     }
   },
-  "totalRequests": 30,
+  "totalRequests": 32,
   "lastReset": "2025-09-20T15:13:33.742Z"
 }

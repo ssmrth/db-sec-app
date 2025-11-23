@@ -82,8 +82,8 @@ const VulnerableLayout: React.FC = () => {
       </header>
 
       {/* Search Bar */}
-      <div className="vulnerable-card mx-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div className="vulnerable-card py-6 rounded-xl px-4">
           <form 
             onSubmit={(e) => {
               e.preventDefault();
@@ -93,25 +93,30 @@ const VulnerableLayout: React.FC = () => {
                 window.location.href = `/vulnerable/search?q=${encodeURIComponent(query)}`;
               }
             }}
-            className="relative max-w-xl mx-auto"
+            className="relative max-w-4xl mx-auto w-full"
           >
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <div className="relative flex items-center w-full h-14 rounded-xl focus-within:shadow-lg bg-white overflow-hidden border border-gray-300 focus-within:border-thunderlarra focus-within:ring-2 focus-within:ring-thunderlarra/20 transition-all shadow-sm group">
+              <div className="grid place-items-center h-full w-14 text-gray-400 group-focus-within:text-thunderlarra transition-colors">
+                <Search className="h-6 w-6" />
+              </div>
+
               <input
+                className="flex-1 h-full outline-none text-base text-gray-700 bg-transparent border-none focus:ring-0 placeholder-gray-400"
                 type="text"
                 name="search"
-                placeholder="Search products..."
-                className="w-full pl-16 pr-24 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-thunderlarra focus:border-transparent"
+                placeholder="Search for products, brands, and more..." 
               />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-thunderlarra text-white px-4 py-1.5 rounded-md hover:bg-thunderlarra-dark transition-colors"
-              >
-                Search
-              </button>
+
+              <div className="pr-2 py-1.5">
+                <button
+                  type="submit"
+                  className="h-full px-8 bg-thunderlarra hover:bg-thunderlarra-dark text-white text-base font-medium rounded-lg transition-colors flex items-center justify-center shadow-md"
+                >
+                  Search
+                </button>
+              </div>
             </div>
           </form>
-          
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, TrendingUp, AlertTriangle, Package } from 'lucide-react';
+import { ShoppingCart, Star, Package } from 'lucide-react';
 import { vulnerableApi, Product } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -165,34 +165,9 @@ const HomePage: React.FC = () => {
           </div>
         )}
       </section>
-
-      {/* About Section */}
-      <section className="vulnerable-card rounded-xl p-8 bg-gradient-to-r from-aged-jade-light to-thunderlarra-light">
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Premium Shopping Experience
-          </h3>
-          <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-            Discover our curated collection of products with advanced features, personalized recommendations, and seamless shopping experience.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <Link
-              to="/dashboard"
-              className="bg-aged-jade text-white px-6 py-3 rounded-lg hover:bg-aged-jade-dark transition-colors"
-            >
-              View Analytics
-            </Link>
-            <Link
-              to="/dashboard/live"
-              className="bg-thunderlarra text-white px-6 py-3 rounded-lg hover:bg-thunderlarra-dark transition-colors"
-            >
-              Live Monitoring
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
 
 export default HomePage;
+
