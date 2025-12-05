@@ -11,7 +11,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3002",
+    origin: process.env.FRONTEND_URL || '*',
     methods: ["GET", "POST"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -22,7 +22,8 @@ const io = socketIo(server, {
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3002"
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
 }));
 app.use(express.json());
 app.use(helmet({
