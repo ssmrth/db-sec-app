@@ -3,7 +3,7 @@ logs
 frontend/node_modules
 .env
 reports/*.pdf
-
+RENDER_DEPLOYMENT.md
 # Frontend build output
 frontend/build
 frontend/.env.local

@@ -1,0 +1,47 @@
+services:
+  # Backend API Service
+  - type: web
+    name: nosql-security-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: nosql-security-db
+          property: connectionString
+      - key: FRONTEND_URL
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # Frontend Service
+  - type: web
+    name: nosql-security-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: nosql-security-backend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: REACT_APP_SOCKET_URL
+        fromService:
+          type: web
+          name: nosql-security-backend
+          envVarKey: RENDER_EXTERNAL_URL
+
+databases:
+  # MongoDB Database
+  - name: nosql-security-db
+    databaseName: nosql_security
+    user: nosql_user
