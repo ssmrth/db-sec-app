@@ -86,6 +86,11 @@ const vulnerableRoutes = require('./routes/vulnerable');
 app.use('/api', apiRoutes);
 app.use('/api/vulnerable', vulnerableRoutes);
 
+// 404 handler for API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found', path: req.path });
+});
+
 // Serve static files from React app (for production)
 const frontendBuildPath = path.join(__dirname, 'frontend', 'build');
 
@@ -93,35 +98,54 @@ const frontendBuildPath = path.join(__dirname, 'frontend', 'build');
 if (fs.existsSync(frontendBuildPath)) {
   console.log('📦 Serving frontend build from:', frontendBuildPath);
   
-  // Serve static files (JS, CSS, images, etc.) - must be before catch-all
+  // Serve static files (JS, CSS, images, etc.) with proper MIME types
+  // This MUST be before any catch-all routes
+  // Important: This serves files from frontend/build directory
   app.use(express.static(frontendBuildPath, {
     maxAge: '1y',
-    etag: false,
-    index: false // Don't serve index.html for directory requests
+    etag: true,
+    index: false, // Don't serve index.html for directory requests
+    fallthrough: false, // Don't fall through if file not found
+    setHeaders: (res, filePath) => {
+      // Ensure proper MIME types for JavaScript and CSS files
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      } else if (filePath.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      }
+    }
   }));
   
-  // Root route
+  // Root route - serve index.html
   app.get('/', (req, res) => {
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
   
   // Catch-all handler for client-side routing (React Router)
-  // Use middleware function instead of route pattern to avoid path-to-regexp issues
-  app.use((req, res, next) => {
+  // This must be the LAST middleware and only handle non-API, non-static routes
+  // Only handle GET requests for HTML routes
+  app.get('*', (req, res, next) => {
     // Skip API routes
     if (req.path.startsWith('/api')) {
       return next();
     }
     
-    // Skip static file requests (should have been handled by express.static)
-    const ext = path.extname(req.path);
-    if (ext && ext !== '.html' && ext !== '') {
-      return next();
+    // Skip requests that look like static files
+    // These should have been handled by express.static above
+    const ext = path.extname(req.path).toLowerCase();
+    const staticExtensions = ['.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map', '.webp', '.avif', '.txt', '.xml'];
+    if (staticExtensions.includes(ext)) {
+      // Static file should have been served by express.static
+      // If we reach here, file doesn't exist
+      return res.status(404).send('File not found');
     }
     
-    // Send index.html for all other routes (React Router will handle routing)
+    // For all other GET requests, send index.html (React Router will handle routing)
     res.sendFile(path.join(frontendBuildPath, 'index.html'), (err) => {
       if (err) {
+        console.error('Error sending index.html:', err);
         next(err);
       }
     });
