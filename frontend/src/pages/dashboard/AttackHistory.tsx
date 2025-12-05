@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { History, Shield, Clock, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { dashboardApi, Attack } from '../../services/api';
 import socketService from '../../services/socket';
@@ -15,36 +15,7 @@ const AttackHistory: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    loadAttacks();
-    
-    // Set up real-time updates
-    const unsubscribeAttacks = socketService.onNewAttack((attack) => {
-      const attackWithSummary = {
-        ...attack,
-        summary: generateSummary(attack)
-      };
-      setAttacks(prev => [attackWithSummary, ...prev]);
-      toast.success(`New attack detected: ${attack.description}`, {
-        icon: '🔔',
-        style: {
-          background: '#1E293B',
-          color: '#fff',
-          border: '1px solid #334155'
-        }
-      });
-    });
-
-    return () => {
-      unsubscribeAttacks();
-    };
-  }, []);
-
-  useEffect(() => {
-    loadAttacks();
-  }, [page]);
-
-  const loadAttacks = async () => {
+  const loadAttacks = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Loading attack history...');
@@ -73,7 +44,32 @@ const AttackHistory: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    loadAttacks();
+    
+    // Set up real-time updates
+    const unsubscribeAttacks = socketService.onNewAttack((attack) => {
+      const attackWithSummary = {
+        ...attack,
+        summary: generateSummary(attack)
+      };
+      setAttacks(prev => [attackWithSummary, ...prev]);
+      toast.success(`New attack detected: ${attack.description}`, {
+        icon: '🔔',
+        style: {
+          background: '#1E293B',
+          color: '#fff',
+          border: '1px solid #334155'
+        }
+      });
+    });
+
+    return () => {
+      unsubscribeAttacks();
+    };
+  }, [loadAttacks]);
 
   // Generate a brief 2-3 line summary based on attack data
   const generateSummary = (attack: Attack): string => {

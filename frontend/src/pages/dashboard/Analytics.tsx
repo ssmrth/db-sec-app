@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BarChart3, Target, Clock, TrendingUp, AlertTriangle, Shield, PieChart, RefreshCw } from 'lucide-react';
 import { dashboardApi, Attack } from '../../services/api';
 import socketService from '../../services/socket';
-import toast from 'react-hot-toast';
 
 interface AttackStats {
   byEndpoint: { endpoint: string; count: number }[];
@@ -22,6 +21,42 @@ const Analytics: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const loadAnalytics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Loading analytics data...');
+      const data = await dashboardApi.getRecentAttacks(100, 1);
+      console.log('Received data:', data);
+      
+      if (!data || !data.attacks) {
+        console.log('No attacks data in response');
+        setStats({
+          byEndpoint: [],
+          bySeverity: [],
+          byHour: [],
+          byType: [],
+          total: 0
+        });
+        return;
+      }
+      
+      // Process attacks to generate statistics
+      const attacks = data.attacks || [];
+      console.log(`Processing ${attacks.length} attacks`);
+      const processedStats = processAttackData(attacks);
+      console.log('Processed stats:', processedStats);
+      setStats(processedStats);
+    } catch (err: any) {
+      console.error('Error loading analytics:', err);
+      setError(err.message || 'Failed to load analytics');
+      // Don't reset stats on error - keep existing data
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadAnalytics();
@@ -107,43 +142,7 @@ const Analytics: React.FC = () => {
     return () => {
       unsubscribeAttacks();
     };
-  }, []);
-
-  const loadAnalytics = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Loading analytics data...');
-      const data = await dashboardApi.getRecentAttacks(100, 1);
-      console.log('Received data:', data);
-      
-      if (!data || !data.attacks) {
-        console.log('No attacks data in response');
-        setStats({
-          byEndpoint: [],
-          bySeverity: [],
-          byHour: [],
-          byType: [],
-          total: 0
-        });
-        return;
-      }
-      
-      // Process attacks to generate statistics
-      const attacks = data.attacks || [];
-      console.log(`Processing ${attacks.length} attacks`);
-      const processedStats = processAttackData(attacks);
-      console.log('Processed stats:', processedStats);
-      setStats(processedStats);
-    } catch (err: any) {
-      console.error('Error loading analytics:', err);
-      setError(err.message || 'Failed to load analytics');
-      // Don't reset stats on error - keep existing data
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loadAnalytics]);
 
   const processAttackData = (attacks: Attack[]): AttackStats => {
     if (!attacks || (attacks || []).length === 0) {
@@ -466,9 +465,6 @@ const Analytics: React.FC = () => {
                   }}>
                     {(stats.byHour || []).map((item, index) => {
                       const barHeight = maxHourCount > 0 ? (item.count / maxHourCount) * 160 : 0;
-                      const hour = parseInt(item.hour.split(':')[0]);
-                      const ampm = hour >= 12 ? 'PM' : 'AM';
-                      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
                       
                       return (
                         <div 

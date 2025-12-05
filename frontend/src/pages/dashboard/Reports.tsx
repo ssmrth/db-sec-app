@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Trash2, Calendar, File, AlertCircle, CheckCircle, Lock } from 'lucide-react';
+import { Download, Trash2, Calendar, File, AlertCircle, CheckCircle, Lock } from 'lucide-react';
 import { reportsApi, Report, alertsApi } from '../../services/api';
 import toast from 'react-hot-toast';
 
