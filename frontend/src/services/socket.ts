@@ -18,7 +18,28 @@ class SocketService {
       return;
     }
 
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8080';
+    const getSocketUrl = () => {
+      // Always prefer environment variable if set
+      if (process.env.REACT_APP_SOCKET_URL) {
+        return process.env.REACT_APP_SOCKET_URL;
+      }
+      
+      // Check if we're in production
+      if (process.env.NODE_ENV === 'production') {
+        // In production, if no env var set, assume frontend and backend are on same domain
+        // This works for Railway single-service deployments
+        if (typeof window !== 'undefined') {
+          return window.location.origin;
+        }
+        // Server-side rendering fallback
+        return '';
+      }
+      
+      // Development: use localhost
+      return 'http://localhost:8080';
+    };
+
+    const socketUrl = getSocketUrl();
     console.log(`🔌 Connecting to socket server at ${socketUrl}`);
     
     this.socket = io(socketUrl, {

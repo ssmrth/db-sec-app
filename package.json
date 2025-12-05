@@ -10,6 +10,8 @@
     "frontend": "cd frontend && npm start",
     "frontend:install": "cd frontend && npm install",
     "frontend:build": "cd frontend && npm run build",
+    "build": "npm run frontend:install && npm run frontend:build",
+    "postinstall": "cd frontend && npm install",
     "demo": "bash ../start-demo.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -1,7 +1,30 @@
 import axios from 'axios';
 
 // API base URL - adjust based on your backend port
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// In production, use the Railway backend URL
+// For Railway: use REACT_APP_API_URL environment variable
+const getApiBaseUrl = () => {
+  // Always prefer environment variable if set (works in both dev and prod)
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Check if we're in production
+  if (process.env.NODE_ENV === 'production') {
+    // In production, if no env var set, assume frontend and backend are on same domain
+    // This works for Railway single-service deployments
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    // Server-side rendering fallback
+    return '';
+  }
+  
+  // Development: use localhost
+  return 'http://localhost:8080';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Create axios instance
 const api = axios.create({
