@@ -105,7 +105,7 @@ if (fs.existsSync(frontendBuildPath)) {
     maxAge: '1y',
     etag: true,
     index: false, // Don't serve index.html for directory requests
-    fallthrough: false, // Don't fall through if file not found
+    fallthrough: true, // Allow fallthrough to next middleware if file not found
     setHeaders: (res, filePath) => {
       // Ensure proper MIME types for JavaScript and CSS files
       if (filePath.endsWith('.js')) {
@@ -124,9 +124,14 @@ if (fs.existsSync(frontendBuildPath)) {
   });
   
   // Catch-all handler for client-side routing (React Router)
-  // This must be the LAST middleware and only handle non-API, non-static routes
-  // Only handle GET requests for HTML routes
-  app.get('*', (req, res, next) => {
+  // Use middleware function instead of route pattern to avoid path-to-regexp issues
+  // This must be the LAST middleware
+  app.use((req, res, next) => {
+    // Only handle GET requests
+    if (req.method !== 'GET') {
+      return next();
+    }
+    
     // Skip API routes
     if (req.path.startsWith('/api')) {
       return next();
@@ -135,7 +140,7 @@ if (fs.existsSync(frontendBuildPath)) {
     // Skip requests that look like static files
     // These should have been handled by express.static above
     const ext = path.extname(req.path).toLowerCase();
-    const staticExtensions = ['.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map', '.webp', '.avif', '.txt', '.xml'];
+    const staticExtensions = ['.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map', '.webp', '.avif', '.txt', '.xml', '.pdf'];
     if (staticExtensions.includes(ext)) {
       // Static file should have been served by express.static
       // If we reach here, file doesn't exist
