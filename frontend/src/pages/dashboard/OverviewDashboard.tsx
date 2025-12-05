@@ -27,7 +27,7 @@ const OverviewDashboard: React.FC = () => {
     
     // Set up real-time updates
     const unsubscribeAttacks = socketService.onNewAttack((attack) => {
-      setRecentAttacks(prev => [attack, ...prev.slice(0, 4)]);
+      setRecentAttacks(prev => [attack, ...(prev || []).slice(0, 4)]);
       toast.success(`New threat detected: ${attack.description}`, {
         icon: '🛡️',
         style: {
@@ -56,7 +56,7 @@ const OverviewDashboard: React.FC = () => {
       ]);
       
       setMetrics(metricsData);
-      setRecentAttacks(attacksData.attacks);
+      setRecentAttacks(Array.isArray(attacksData.attacks) ? attacksData.attacks : []);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       toast.error('Failed to load dashboard data');
@@ -181,14 +181,14 @@ const OverviewDashboard: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {recentAttacks.length === 0 ? (
+            {(recentAttacks || []).length === 0 ? (
               <div className="text-center py-12 border border-dashed border-gray-700 rounded-xl bg-gray-800/30">
                 <Shield className="h-12 w-12 text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400 font-medium">No threats detected recently</p>
                 <p className="text-sm text-gray-500 mt-1">System is secure and monitoring</p>
               </div>
             ) : (
-              recentAttacks.map((attack) => (
+              (recentAttacks || []).map((attack) => (
                 <div key={attack.id} className="group flex items-center justify-between p-4 bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 hover:border-gray-600 rounded-xl transition-all duration-200">
                   <div className="flex items-start space-x-4">
                     <div className={`mt-1 h-2 w-2 rounded-full ${

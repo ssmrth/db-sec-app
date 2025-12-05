@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
   const loadProducts = async () => {
     try {
       const data = await vulnerableApi.getProducts();
-      setProducts(data.products.slice(0, 6)); // Show first 6 products
+      setProducts((data.products || []).slice(0, 6)); // Show first 6 products
     } catch (error) {
       toast.error('Failed to load products');
       console.error('Error loading products:', error);
@@ -122,7 +122,7 @@ const HomePage: React.FC = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
-            {products.map((product) => (
+            {(products || []).map((product) => (
               <div key={product._id} className="vulnerable-card rounded-lg p-6 hover:shadow-lg transition-shadow">
                 <div className="bg-gradient-to-br from-aged-jade-light to-thunderlarra-light h-48 rounded-md mb-4 flex items-center justify-center">
                   <Package className="h-16 w-16 text-aged-jade" />

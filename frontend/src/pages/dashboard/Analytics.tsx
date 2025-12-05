@@ -131,7 +131,7 @@ const Analytics: React.FC = () => {
       }
       
       // Process attacks to generate statistics
-      const attacks = data.attacks;
+      const attacks = data.attacks || [];
       console.log(`Processing ${attacks.length} attacks`);
       const processedStats = processAttackData(attacks);
       console.log('Processed stats:', processedStats);
@@ -146,7 +146,7 @@ const Analytics: React.FC = () => {
   };
 
   const processAttackData = (attacks: Attack[]): AttackStats => {
-    if (!attacks || attacks.length === 0) {
+    if (!attacks || (attacks || []).length === 0) {
       return {
         byEndpoint: [],
         bySeverity: [],
@@ -209,23 +209,23 @@ const Analytics: React.FC = () => {
     });
 
     return {
-      byEndpoint: Object.entries(endpointCounts)
+      byEndpoint: (Object.entries(endpointCounts) || [])
         .map(([endpoint, count]) => ({ endpoint, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5),
-      bySeverity: Object.entries(severityCounts)
+      bySeverity: (Object.entries(severityCounts) || [])
         .map(([severity, count]) => ({ severity, count }))
         .sort((a, b) => {
           const order: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
           return (order[a.severity] ?? 4) - (order[b.severity] ?? 4);
         }),
-      byHour: Object.entries(hourCounts)
+      byHour: (Object.entries(hourCounts) || [])
         .map(([hour, count]) => ({ hour, count }))
         .sort((a, b) => a.hour.localeCompare(b.hour)),
-      byType: Object.entries(typeCounts)
+      byType: (Object.entries(typeCounts) || [])
         .map(([type, count]) => ({ type, count }))
         .sort((a, b) => b.count - a.count),
-      total: attacks.length
+      total: (attacks || []).length
     };
   };
 
@@ -250,9 +250,9 @@ const Analytics: React.FC = () => {
     );
   }
 
-  const maxEndpointCount = Math.max(...(stats.byEndpoint.map(e => e.count)), 1);
-  const maxHourCount = Math.max(...(stats.byHour.map(h => h.count)), 1);
-  const maxTypeCount = Math.max(...(stats.byType.map(t => t.count)), 1);
+  const maxEndpointCount = Math.max(...((stats.byEndpoint || []).map(e => e.count)), 1);
+  const maxHourCount = Math.max(...((stats.byHour || []).map(h => h.count)), 1);
+  const maxTypeCount = Math.max(...((stats.byType || []).map(t => t.count)), 1);
 
   return (
     <div className="space-y-6">
@@ -350,11 +350,11 @@ const Analytics: React.FC = () => {
                 <h3 className="text-lg font-bold text-white">Most Targeted Endpoints</h3>
               </div>
               
-              {stats.byEndpoint.length === 0 ? (
+              {(stats.byEndpoint || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No endpoint data available</div>
               ) : (
                 <div className="space-y-5">
-                  {stats.byEndpoint.map((item, index) => (
+                  {(stats.byEndpoint || []).map((item, index) => (
                     <div key={index}>
                       <div className="flex items-center justify-between mb-2">
                         <code className="text-sm text-gray-300 font-mono">{item.endpoint}</code>
@@ -379,11 +379,11 @@ const Analytics: React.FC = () => {
                 <h3 className="text-lg font-bold text-white">Attack Types</h3>
               </div>
               
-              {stats.byType.length === 0 ? (
+              {(stats.byType || []).length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No attack type data available</div>
               ) : (
                 <div className="space-y-5">
-                  {stats.byType.map((item, index) => (
+                  {(stats.byType || []).map((item, index) => (
                     <div key={index}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-300">{item.type}</span>
@@ -403,7 +403,7 @@ const Analytics: React.FC = () => {
           </div>
 
           {/* Attack Timeline - Bar Chart */}
-          {stats.byHour.length > 0 && (
+          {(stats.byHour || []).length > 0 && (
             <div className="dashboard-card p-6">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-3">
@@ -464,7 +464,7 @@ const Analytics: React.FC = () => {
                     position: 'relative',
                     zIndex: 1
                   }}>
-                    {stats.byHour.map((item, index) => {
+                    {(stats.byHour || []).map((item, index) => {
                       const barHeight = maxHourCount > 0 ? (item.count / maxHourCount) * 160 : 0;
                       const hour = parseInt(item.hour.split(':')[0]);
                       const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -515,7 +515,7 @@ const Analytics: React.FC = () => {
                     borderTop: '1px solid rgba(75, 85, 99, 0.5)',
                     paddingTop: '8px'
                   }}>
-                    {stats.byHour.map((item, index) => {
+                    {(stats.byHour || []).map((item, index) => {
                       const hour = parseInt(item.hour.split(':')[0]);
                       const ampm = hour >= 12 ? 'p' : 'a';
                       const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;

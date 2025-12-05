@@ -59,7 +59,7 @@ const AttackHistory: React.FC = () => {
       }
       
       // Generate brief summaries for each attack
-      const attacksWithSummaries = data.attacks.map((attack: Attack) => ({
+      const attacksWithSummaries = (data.attacks || []).map((attack: Attack) => ({
         ...attack,
         summary: generateSummary(attack)
       }));
@@ -156,14 +156,14 @@ const AttackHistory: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : attacks.length === 0 ? (
+        ) : (attacks || []).length === 0 ? (
           <div className="dashboard-card p-12 text-center">
             <Shield className="h-16 w-16 text-gray-700 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-400 mb-2">No Attacks Recorded</h3>
             <p className="text-gray-500">When injection attempts are detected, they will appear here with detailed analysis.</p>
           </div>
         ) : (
-          attacks.map((attack) => (
+          (attacks || []).map((attack) => (
             <div
               key={attack.id}
               className={`dashboard-card overflow-hidden border-l-4 ${getSeverityBg(attack.severity)} transition-all duration-200`}
@@ -249,7 +249,7 @@ const AttackHistory: React.FC = () => {
       </div>
 
       {/* Pagination */}
-      {!loading && attacks.length > 0 && totalPages > 1 && (
+      {!loading && (attacks || []).length > 0 && totalPages > 1 && (
         <div className="flex items-center justify-center space-x-4 pt-4">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}

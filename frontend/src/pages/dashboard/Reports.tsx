@@ -32,7 +32,7 @@ const Reports: React.FC = () => {
       }
       
       const data = await reportsApi.getReports();
-      setReports(data.reports);
+      setReports(Array.isArray(data.reports) ? data.reports : []);
     } catch (error: any) {
       if (error.response?.status === 403) {
         setCanViewReports(false);
@@ -142,7 +142,7 @@ const Reports: React.FC = () => {
           <p className="text-sm text-gray-400 mt-1">AI-generated incident reports and compliance documentation</p>
         </div>
         <div className="text-right px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700/50">
-          <p className="text-2xl font-bold text-green-500">{reports.length}</p>
+          <p className="text-2xl font-bold text-green-500">{(reports || []).length}</p>
           <p className="text-xs text-gray-500 uppercase tracking-wide">Available Reports</p>
         </div>
       </div>
@@ -177,7 +177,7 @@ const Reports: React.FC = () => {
                   Visit the <span className="text-blue-400">Alerts</span> page to configure recipient permissions.
                 </p>
               </div>
-            ) : reports.length === 0 ? (
+            ) : (reports || []).length === 0 ? (
               <div className="text-center py-16 border border-dashed border-gray-800 rounded-xl">
                 <AlertCircle className="h-12 w-12 text-gray-600 mx-auto mb-4" />
                 <p className="text-gray-400 mb-2">No reports generated yet</p>
@@ -187,7 +187,7 @@ const Reports: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-8">
-                {Object.entries(groupedReports).map(([date, dateReports]) => (
+                {Object.entries(groupedReports || {}).map(([date, dateReports]) => (
                   <div key={date}>
                     <div className="flex items-center space-x-2 mb-4 px-2">
                       <Calendar className="h-4 w-4 text-gray-500" />
@@ -195,7 +195,7 @@ const Reports: React.FC = () => {
                     </div>
                     
                     <div className="space-y-3">
-                      {dateReports.map((report) => (
+                      {(dateReports || []).map((report) => (
                         <div
                           key={report.filename}
                           className="group bg-gray-800/30 border border-gray-800 hover:border-gray-700 hover:bg-gray-800 rounded-xl p-4 transition-all duration-200"

@@ -29,7 +29,7 @@ const AlertsManagement: React.FC = () => {
     try {
       setLoading(true);
       const data = await alertsApi.getRecipients();
-      setRecipients(data.recipients);
+      setRecipients(Array.isArray(data.recipients) ? data.recipients : []);
       
       // Check permissions
       try {
@@ -37,7 +37,7 @@ const AlertsManagement: React.FC = () => {
         setCanManageAlerts(permissions.canManageAlerts);
       } catch (permError) {
         // If no recipients exist yet, allow management
-        setCanManageAlerts(data.recipients.length === 0);
+        setCanManageAlerts((data.recipients || []).length === 0);
       }
     } catch (error: any) {
       toast.error('Failed to load recipients');
@@ -210,7 +210,7 @@ const AlertsManagement: React.FC = () => {
           <div className="dashboard-card p-12 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
-        ) : recipients.length === 0 ? (
+        ) : (recipients || []).length === 0 ? (
           <div className="dashboard-card p-12 text-center">
             <Mail className="h-12 w-12 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">No alert recipients configured</p>
@@ -223,7 +223,7 @@ const AlertsManagement: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recipients.map((recipient) => (
+            {(recipients || []).map((recipient) => (
               <div
                 key={recipient._id}
                 className={`dashboard-card p-6 relative group border transition-all duration-200 ${
