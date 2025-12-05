@@ -50,7 +50,12 @@ const getAllowedOrigins = () => {
 };
 
 const allowedOrigins = getAllowedOrigins();
-console.log('🌐 Allowed CORS origins:', allowedOrigins);
+// Log origins safely (avoid issues with path-to-regexp)
+if (Array.isArray(allowedOrigins)) {
+  console.log('🌐 Allowed CORS origins:', allowedOrigins.length, 'origin(s) configured');
+} else {
+  console.log('🌐 Allowed CORS origins: * (all origins)');
+}
 
 const io = socketIo(server, {
   cors: {
@@ -77,32 +82,54 @@ app.use(helmet({
 const apiRoutes = require('./routes/api');
 const vulnerableRoutes = require('./routes/vulnerable');
 
+// API routes (must be before static file serving)
+app.use('/api', apiRoutes);
+app.use('/api/vulnerable', vulnerableRoutes);
+
 // Serve static files from React app (for production)
 const frontendBuildPath = path.join(__dirname, 'frontend', 'build');
 
 // Check if frontend build exists and serve it
 if (fs.existsSync(frontendBuildPath)) {
   console.log('📦 Serving frontend build from:', frontendBuildPath);
-  app.use(express.static(frontendBuildPath));
-}
-
-// API routes (before catch-all)
-app.use('/api', apiRoutes);
-app.use('/api/vulnerable', vulnerableRoutes);
-
-// Root route - serve API info if frontend not built, otherwise frontend handles it
-if (!fs.existsSync(frontendBuildPath)) {
+  
+  // Serve static files (JS, CSS, images, etc.) - must be before catch-all
+  app.use(express.static(frontendBuildPath, {
+    maxAge: '1y',
+    etag: false,
+    index: false // Don't serve index.html for directory requests
+  }));
+  
+  // Root route
   app.get('/', (req, res) => {
-    res.json({ message: 'API is running', frontend: 'Not built yet' });
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+  
+  // Catch-all handler for client-side routing (React Router)
+  // Use middleware function instead of route pattern to avoid path-to-regexp issues
+  app.use((req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    
+    // Skip static file requests (should have been handled by express.static)
+    const ext = path.extname(req.path);
+    if (ext && ext !== '.html' && ext !== '') {
+      return next();
+    }
+    
+    // Send index.html for all other routes (React Router will handle routing)
+    res.sendFile(path.join(frontendBuildPath, 'index.html'), (err) => {
+      if (err) {
+        next(err);
+      }
+    });
   });
 } else {
-  // Catch-all handler: send back React's index.html file for client-side routing
-  app.get('*', (req, res) => {
-    // Don't serve index.html for API routes
-    if (req.path.startsWith('/api')) {
-      return res.status(404).json({ error: 'API endpoint not found' });
-    }
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  // No frontend build - API only mode
+  app.get('/', (req, res) => {
+    res.json({ message: 'API is running', frontend: 'Not built yet' });
   });
 }
 
@@ -147,7 +174,6 @@ const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📡 CORS Origins: ${JSON.stringify(allowedOrigins)}`);
   if (fs.existsSync(frontendBuildPath)) {
     console.log(`✅ Frontend build found - serving static files`);
   } else {
