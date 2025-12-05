@@ -34,6 +34,11 @@ app.use(helmet({
 const apiRoutes = require('./routes/api');
 const vulnerableRoutes = require('./routes/vulnerable');
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ message: 'API is running' });
+});
+
 // Use routes
 app.use('/api', apiRoutes);
 app.use('/api/vulnerable', vulnerableRoutes);
@@ -76,7 +81,7 @@ connectDB().then(() => {
 });
 
 const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
   console.log(`Frontend should connect to http://localhost:${PORT}`);
 });
