@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 const AlertsManagement: React.FC = () => {
   const [recipients, setRecipients] = useState<AlertRecipient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [canManageAlerts, setCanManageAlerts] = useState(true); // Default to true for initial setup
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingRecipient, setEditingRecipient] = useState<AlertRecipient | null>(null);
   const [formData, setFormData] = useState({
@@ -29,6 +30,15 @@ const AlertsManagement: React.FC = () => {
       setLoading(true);
       const data = await alertsApi.getRecipients();
       setRecipients(data.recipients);
+      
+      // Check permissions
+      try {
+        const permissions = await alertsApi.checkPermissions();
+        setCanManageAlerts(permissions.canManageAlerts);
+      } catch (permError) {
+        // If no recipients exist yet, allow management
+        setCanManageAlerts(data.recipients.length === 0);
+      }
     } catch (error: any) {
       toast.error('Failed to load recipients');
       console.error('Error loading recipients:', error);
@@ -183,13 +193,15 @@ const AlertsManagement: React.FC = () => {
           </h1>
           <p className="text-sm text-gray-400 mt-1">Configure notification routing and access controls</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 font-medium"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Recipient</span>
-        </button>
+        {canManageAlerts && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 font-medium"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Recipient</span>
+          </button>
+        )}
       </div>
 
       {/* Recipients List */}
@@ -231,20 +243,22 @@ const AlertsManagement: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <button
-                      onClick={() => openEditModal(recipient)}
-                      className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteRecipient(recipient._id)}
-                      className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  {canManageAlerts && (
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => openEditModal(recipient)}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRecipient(recipient._id)}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -372,6 +386,7 @@ const AlertsManagement: React.FC = () => {
                     className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
                   />
                   <span>Receive Alerts</span>
+                  <span className="text-xs text-green-400 ml-2">✓ Controls email delivery</span>
                 </label>
                 <label className="flex items-center space-x-2 text-sm text-gray-300">
                   <input
@@ -381,6 +396,7 @@ const AlertsManagement: React.FC = () => {
                     className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
                   />
                   <span>View Reports</span>
+                  <span className="text-xs text-blue-400 ml-2">✓ Controls report access</span>
                 </label>
                 <label className="flex items-center space-x-2 text-sm text-gray-300">
                   <input
@@ -390,6 +406,7 @@ const AlertsManagement: React.FC = () => {
                     className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
                   />
                   <span>Manage Alerts</span>
+                  <span className="text-xs text-orange-400 ml-2">✓ Controls recipient management</span>
                 </label>
                 <label className="flex items-center space-x-2 text-sm text-gray-300">
                   <input
@@ -399,7 +416,13 @@ const AlertsManagement: React.FC = () => {
                     className="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500"
                   />
                   <span>Manage Settings</span>
+                  <span className="text-xs text-gray-500 ml-2">(Reserved for future use)</span>
                 </label>
+                <p className="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-700">
+                  <strong>Note:</strong> Recipients must be active and have "Receive Alerts" enabled to receive email notifications. 
+                  At least one active recipient with "View Reports" is required to access reports. 
+                  At least one active recipient with "Manage Alerts" is required to manage recipients.
+                </p>
               </div>
 
               <button

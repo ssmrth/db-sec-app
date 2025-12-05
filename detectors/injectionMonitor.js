@@ -2,10 +2,22 @@ const mongoose = require('mongoose');
 const AttackLog = require('../models/AttackLog');
 const generateReport = require('../reports/generateReport');
 const sendAlert = require('../alerts/sendAlert');
+const SystemSettings = require('../models/SystemSettings');
 const fs = require('fs');
 const path = require('path');
 
 const db = mongoose.connection;
+
+// Helper to get a setting value from the database
+async function getSetting(key, defaultValue) {
+  try {
+    const setting = await SystemSettings.findOne({ key });
+    return setting ? setting.value : defaultValue;
+  } catch (error) {
+    console.error(`Error getting setting ${key}:`, error.message);
+    return defaultValue;
+  }
+}
 
 function detectInjection(doc) {
   const suspicious = JSON.stringify(doc).includes('$ne') || JSON.stringify(doc).includes('$gt');
@@ -52,27 +64,42 @@ function watchCollection() {
               });
               await newLog.save();
 
-              // Generate report ONLY if not already processed
-              const reportPath = await generateReport({
-                attackType: 'NoSQL Injection',
-                collection: 'users',
-                query: doc,
-                detectedAt: new Date().toISOString(),
-                documentId: docId,
-                sourceIP: doc.sourceIP || '127.0.0.1',
-                userAgent: doc.userAgent || 'Unknown'
-              });
-
-              // Send email ONLY if report was generated
-              await sendAlert(
-                {
-                  detectedAt: new Date().toISOString(),
-                  collection: 'users',
+              // Check if report generation is enabled
+              const reportEnabled = await getSetting('reportGeneration', true);
+              let reportPath = null;
+              
+              if (reportEnabled) {
+                // Generate report ONLY if enabled
+                reportPath = await generateReport({
                   attackType: 'NoSQL Injection',
-                  documentId: docId
-                },
-                reportPath
-              );
+                  collection: 'users',
+                  query: doc,
+                  detectedAt: new Date().toISOString(),
+                  documentId: docId,
+                  sourceIP: doc.sourceIP || '127.0.0.1',
+                  userAgent: doc.userAgent || 'Unknown'
+                });
+              } else {
+                console.log('📝 Report generation disabled - skipping');
+              }
+
+              // Check if email alerts are enabled
+              const emailEnabled = await getSetting('emailNotifications', true);
+              
+              if (emailEnabled) {
+                // Send email alert
+                await sendAlert(
+                  {
+                    detectedAt: new Date().toISOString(),
+                    collection: 'users',
+                    attackType: 'NoSQL Injection',
+                    documentId: docId
+                  },
+                  reportPath
+                );
+              } else {
+                console.log('📧 Email alerts disabled - skipping');
+              }
 
               console.log(`✅ Attack ${docId} processed successfully`);
 
@@ -85,7 +112,7 @@ function watchCollection() {
                   severity: determineSeverity(doc),
                   payload: JSON.stringify(doc),
                   collection: 'users',
-                  blocked: true,
+                              detected: true,
                   description: generateDescription(doc)
                 };
                 

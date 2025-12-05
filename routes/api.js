@@ -82,7 +82,7 @@ router.get('/dashboard/attacks/recent', async (req, res) => {
       severity: determineSeverity(attack.rawData),
       payload: JSON.stringify(attack.rawData),
       collection: attack.collection,
-      blocked: true, // All detected attacks are blocked
+      detected: true, // Attack was detected by the monitoring system
       description: generateDescription(attack.rawData)
     }));
 
@@ -158,21 +158,31 @@ router.get('/dashboard/analytics/timeline', async (req, res) => {
 
 // Helper functions
 function determineSeverity(rawData) {
-  const dataStr = JSON.stringify(rawData);
-  if (dataStr.includes('$where') || dataStr.includes('$eval')) return 'critical';
-  if (dataStr.includes('$ne') && dataStr.includes('$gt')) return 'high';
-  if (dataStr.includes('$ne') || dataStr.includes('$gt')) return 'medium';
-  return 'low';
+  if (!rawData) return 'medium';
+  try {
+    const dataStr = JSON.stringify(rawData) || '';
+    if (dataStr.includes('$where') || dataStr.includes('$eval')) return 'critical';
+    if (dataStr.includes('$ne') && dataStr.includes('$gt')) return 'high';
+    if (dataStr.includes('$ne') || dataStr.includes('$gt')) return 'medium';
+    return 'low';
+  } catch (e) {
+    return 'medium';
+  }
 }
 
 function generateDescription(rawData) {
-  const dataStr = JSON.stringify(rawData);
-  if (dataStr.includes('$where')) return 'JavaScript code injection attempt';
-  if (dataStr.includes('$ne') && dataStr.includes('password')) return 'Authentication bypass attempt';
-  if (dataStr.includes('$gt') && dataStr.includes('$ne')) return 'Complex query injection';
-  if (dataStr.includes('$ne')) return 'Not-equal operator injection';
-  if (dataStr.includes('$gt')) return 'Greater-than operator injection';
-  return 'NoSQL injection attempt detected';
+  if (!rawData) return 'NoSQL injection attempt detected';
+  try {
+    const dataStr = JSON.stringify(rawData) || '';
+    if (dataStr.includes('$where')) return 'JavaScript code injection attempt';
+    if (dataStr.includes('$ne') && dataStr.includes('password')) return 'Authentication bypass attempt';
+    if (dataStr.includes('$gt') && dataStr.includes('$ne')) return 'Complex query injection';
+    if (dataStr.includes('$ne')) return 'Not-equal operator injection';
+    if (dataStr.includes('$gt')) return 'Greater-than operator injection';
+    return 'NoSQL injection attempt detected';
+  } catch (e) {
+    return 'NoSQL injection attempt detected';
+  }
 }
 
 // ==================== ALERT RECIPIENTS API ====================
@@ -187,9 +197,35 @@ router.get('/alerts/recipients', async (req, res) => {
   }
 });
 
+// Check permissions
+router.get('/alerts/permissions', async (req, res) => {
+  try {
+    const canViewReports = await hasPermission('viewReports');
+    const canManageAlerts = await hasPermission('manageAlerts');
+    res.json({ 
+      canViewReports,
+      canManageAlerts
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Add new alert recipient
 router.post('/alerts/recipients', async (req, res) => {
   try {
+    // Check if any active recipient has manageAlerts permission
+    const canManage = await hasPermission('manageAlerts');
+    if (!canManage) {
+      // Allow if no recipients exist yet (initial setup)
+      const recipientCount = await AlertRecipient.countDocuments();
+      if (recipientCount > 0) {
+        return res.status(403).json({ 
+          error: 'Access denied. No active recipients have permission to manage alerts.' 
+        });
+      }
+    }
+
     const { email, name, role, permissions } = req.body;
     
     // Check if email already exists
@@ -220,6 +256,14 @@ router.post('/alerts/recipients', async (req, res) => {
 // Update alert recipient
 router.put('/alerts/recipients/:id', async (req, res) => {
   try {
+    // Check if any active recipient has manageAlerts permission
+    const canManage = await hasPermission('manageAlerts');
+    if (!canManage) {
+      return res.status(403).json({ 
+        error: 'Access denied. No active recipients have permission to manage alerts.' 
+      });
+    }
+
     const { id } = req.params;
     const updates = req.body;
 
@@ -242,6 +286,14 @@ router.put('/alerts/recipients/:id', async (req, res) => {
 // Delete alert recipient
 router.delete('/alerts/recipients/:id', async (req, res) => {
   try {
+    // Check if any active recipient has manageAlerts permission
+    const canManage = await hasPermission('manageAlerts');
+    if (!canManage) {
+      return res.status(403).json({ 
+        error: 'Access denied. No active recipients have permission to manage alerts.' 
+      });
+    }
+
     const { id } = req.params;
     const recipient = await AlertRecipient.findByIdAndDelete(id);
 
@@ -257,9 +309,26 @@ router.delete('/alerts/recipients/:id', async (req, res) => {
 
 // ==================== REPORTS API ====================
 
+// Helper function to check if any active recipient has a permission
+async function hasPermission(permission) {
+  const recipient = await AlertRecipient.findOne({
+    isActive: true,
+    [`permissions.${permission}`]: true
+  });
+  return !!recipient;
+}
+
 // Get all reports
 router.get('/reports', async (req, res) => {
   try {
+    // Check if any active recipient has viewReports permission
+    const canView = await hasPermission('viewReports');
+    if (!canView) {
+      return res.status(403).json({ 
+        error: 'Access denied. No active recipients have permission to view reports.' 
+      });
+    }
+
     const reportsDir = path.join(__dirname, '../reports');
     
     // Read all PDF files from reports directory
@@ -289,6 +358,14 @@ router.get('/reports', async (req, res) => {
 // Download specific report
 router.get('/reports/download/:filename', async (req, res) => {
   try {
+    // Check if any active recipient has viewReports permission
+    const canView = await hasPermission('viewReports');
+    if (!canView) {
+      return res.status(403).json({ 
+        error: 'Access denied. No active recipients have permission to view reports.' 
+      });
+    }
+
     const { filename } = req.params;
     const filePath = path.join(__dirname, '../reports', filename);
 
@@ -310,6 +387,14 @@ router.get('/reports/download/:filename', async (req, res) => {
 // Delete report
 router.delete('/reports/:filename', async (req, res) => {
   try {
+    // Check if any active recipient has viewReports permission (needed to delete)
+    const canView = await hasPermission('viewReports');
+    if (!canView) {
+      return res.status(403).json({ 
+        error: 'Access denied. No active recipients have permission to manage reports.' 
+      });
+    }
+
     const { filename } = req.params;
     const filePath = path.join(__dirname, '../reports', filename);
 
@@ -401,7 +486,7 @@ router.get('/analytics/attacks', async (req, res) => {
       payload: attack.rawData,
       payloadString: JSON.stringify(attack.rawData, null, 2),
       description: generateDescription(attack.rawData),
-      blocked: true
+      detected: true
     }));
 
     res.json({

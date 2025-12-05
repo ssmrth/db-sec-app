@@ -2,15 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Shield, 
-  Activity, 
   BarChart3, 
   Bell, 
   FileText, 
   Settings, 
-  Eye,
   ShoppingCart,
-  Wifi,
-  WifiOff
+  WifiOff,
+  History
 } from 'lucide-react';
 import socketService from '../../services/socket';
 
@@ -30,14 +28,12 @@ const DashboardLayout: React.FC = () => {
     
     return () => {
       unsubscribe();
-      // Don't disconnect on unmount - keep connection alive for other dashboard pages
-      // socketService.disconnect();
     };
   }, []);
 
   const navigation = [
     { name: 'Overview', href: '/dashboard/overview', icon: BarChart3 },
-    { name: 'Live Monitoring', href: '/dashboard/live', icon: Activity },
+    { name: 'Attack History', href: '/dashboard/history', icon: History },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
     { name: 'Alerts', href: '/dashboard/alerts', icon: Bell },
     { name: 'Reports', href: '/dashboard/reports', icon: FileText },
@@ -55,7 +51,9 @@ const DashboardLayout: React.FC = () => {
               <Shield className="h-8 w-8 text-blue-500" />
             </div>
             <div>
-              <h1 className="text-white text-lg font-bold tracking-tight">Security<span className="text-blue-500">Center</span></h1>
+              <h1 className="text-white text-lg font-bold tracking-tight">
+                Security<span className="text-blue-500">Center</span>
+              </h1>
               <p className="text-gray-500 text-xs font-medium">Enterprise Edition</p>
             </div>
           </Link>
@@ -117,13 +115,6 @@ const DashboardLayout: React.FC = () => {
               <ShoppingCart className="h-4 w-4 group-hover:text-purple-400 transition-colors" />
               <span>Open Shop Demo</span>
             </Link>
-            <Link
-              to="/dashboard/live"
-              className="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg text-sm transition-colors group"
-            >
-              <Eye className="h-4 w-4 group-hover:text-blue-400 transition-colors" />
-              <span>Live Monitor</span>
-            </Link>
           </div>
           
           <div className="mt-6 px-2 pb-2">
@@ -134,29 +125,13 @@ const DashboardLayout: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
-        <header className="h-20 bg-[#0F172A]/80 backdrop-blur-md border-b border-gray-800 flex items-center justify-between px-8 sticky top-0 z-10">
+        {/* Header - Simplified */}
+        <header className="h-16 bg-[#0F172A]/80 backdrop-blur-md border-b border-gray-800 flex items-center px-8 sticky top-0 z-10">
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">
               {navigation.find(n => n.href === location.pathname)?.name || 'Dashboard'}
             </h2>
-            <p className="text-sm text-gray-500">Real-time security monitoring & analysis</p>
-          </div>
-          
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50">
-              <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider">Environment:</span>
-              <span className="text-sm text-blue-400 font-medium">Production</span>
-            </div>
-            
-            <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-              <Bell className="h-6 w-6" />
-              <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-[#0F172A]"></span>
-            </button>
-            
-            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-900/20 ring-2 ring-gray-800">
-              SC
-            </div>
+            <p className="text-sm text-gray-500 mt-0.5">Real-time security monitoring & analysis</p>
           </div>
         </header>
 

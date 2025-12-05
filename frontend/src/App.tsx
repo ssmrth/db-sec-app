@@ -14,7 +14,7 @@ import SearchResultsPage from './pages/vulnerable/SearchResultsPage';
 // Security Dashboard Components
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import OverviewDashboard from './pages/dashboard/OverviewDashboard';
-import LiveMonitoring from './pages/dashboard/LiveMonitoring';
+import AttackHistory from './pages/dashboard/AttackHistory';
 import Analytics from './pages/dashboard/Analytics';
 import AlertsManagement from './pages/dashboard/AlertsManagement';
 import Reports from './pages/dashboard/Reports';
@@ -39,7 +39,7 @@ function App() {
           <Route path="/dashboard/*" element={<DashboardLayout />}>
             <Route index element={<OverviewDashboard />} />
             <Route path="overview" element={<OverviewDashboard />} />
-            <Route path="live" element={<LiveMonitoring />} />
+            <Route path="history" element={<AttackHistory />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="alerts" element={<AlertsManagement />} />
             <Route path="reports" element={<Reports />} />

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Trash2, Calendar, File, AlertCircle, CheckCircle } from 'lucide-react';
-import { reportsApi, Report } from '../../services/api';
+import { FileText, Download, Trash2, Calendar, File, AlertCircle, CheckCircle, Lock } from 'lucide-react';
+import { reportsApi, Report, alertsApi } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const Reports: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [canViewReports, setCanViewReports] = useState(true); // Default to true for initial setup
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -15,23 +16,63 @@ const Reports: React.FC = () => {
   const loadReports = async () => {
     try {
       setLoading(true);
+      
+      // Check permissions first
+      try {
+        const permissions = await alertsApi.checkPermissions();
+        setCanViewReports(permissions.canViewReports);
+        
+        if (!permissions.canViewReports) {
+          setReports([]);
+          return;
+        }
+      } catch (permError) {
+        // If check fails, try to load anyway (might be initial setup)
+        setCanViewReports(true);
+      }
+      
       const data = await reportsApi.getReports();
       setReports(data.reports);
     } catch (error: any) {
-      toast.error('Failed to load reports');
-      console.error('Error loading reports:', error);
+      if (error.response?.status === 403) {
+        setCanViewReports(false);
+        setReports([]);
+        toast.error('Access denied. No active recipients have permission to view reports.');
+      } else {
+        toast.error('Failed to load reports');
+        console.error('Error loading reports:', error);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownload = (filename: string) => {
-    const downloadUrl = reportsApi.downloadReport(filename);
-    window.open(downloadUrl, '_blank');
-    toast.success('Downloading report...');
+  const handleDownload = async (filename: string) => {
+    if (!canViewReports) {
+      toast.error('Access denied. No permission to view reports.');
+      return;
+    }
+    
+    try {
+      const downloadUrl = reportsApi.downloadReport(filename);
+      window.open(downloadUrl, '_blank');
+      toast.success('Downloading report...');
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        toast.error('Access denied. No permission to view reports.');
+        setCanViewReports(false);
+      } else {
+        toast.error('Failed to download report');
+      }
+    }
   };
 
   const handleDelete = async (filename: string) => {
+    if (!canViewReports) {
+      toast.error('Access denied. No permission to manage reports.');
+      return;
+    }
+
     if (!window.confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
       return;
     }
@@ -42,7 +83,12 @@ const Reports: React.FC = () => {
       toast.success('Report deleted successfully');
       loadReports();
     } catch (error: any) {
-      toast.error('Failed to delete report');
+      if (error.response?.status === 403) {
+        toast.error('Access denied. No permission to manage reports.');
+        setCanViewReports(false);
+      } else {
+        toast.error('Failed to delete report');
+      }
     } finally {
       setDeletingId(null);
     }
@@ -120,6 +166,17 @@ const Reports: React.FC = () => {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                 <p className="text-gray-500 mt-4">Loading reports...</p>
               </div>
+            ) : !canViewReports ? (
+              <div className="text-center py-16 border border-dashed border-red-800/50 rounded-xl bg-red-900/10">
+                <Lock className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                <p className="text-gray-300 mb-2 font-medium">Access Denied</p>
+                <p className="text-sm text-gray-400 mb-4">
+                  No active recipients have permission to view reports.
+                </p>
+                <p className="text-xs text-gray-500">
+                  Visit the <span className="text-blue-400">Alerts</span> page to configure recipient permissions.
+                </p>
+              </div>
             ) : reports.length === 0 ? (
               <div className="text-center py-16 border border-dashed border-gray-800 rounded-xl">
                 <AlertCircle className="h-12 w-12 text-gray-600 mx-auto mb-4" />
@@ -167,26 +224,30 @@ const Reports: React.FC = () => {
                             </div>
                             
                             <div className="flex items-center space-x-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => handleDownload(report.filename)}
-                                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-                                title="Download PDF"
-                              >
-                                <Download className="h-4 w-4" />
-                              </button>
-                              
-                              <button
-                                onClick={() => handleDelete(report.filename)}
-                                disabled={deletingId === report.filename}
-                                className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                title="Delete Report"
-                              >
-                                {deletingId === report.filename ? (
-                                  <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                                ) : (
-                                  <Trash2 className="h-4 w-4" />
-                                )}
-                              </button>
+                              {canViewReports && (
+                                <>
+                                  <button
+                                    onClick={() => handleDownload(report.filename)}
+                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                                    title="Download PDF"
+                                  >
+                                    <Download className="h-4 w-4" />
+                                  </button>
+                                  
+                                  <button
+                                    onClick={() => handleDelete(report.filename)}
+                                    disabled={deletingId === report.filename}
+                                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    title="Delete Report"
+                                  >
+                                    {deletingId === report.filename ? (
+                                      <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                                    ) : (
+                                      <Trash2 className="h-4 w-4" />
+                                    )}
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -207,7 +268,7 @@ const Reports: React.FC = () => {
               Report Automation
             </h3>
             <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-              The system uses Gemini AI to automatically analyze blocked attacks and generate comprehensive PDF reports containing:
+              The system uses Gemini AI to automatically analyze detected attacks and generate comprehensive PDF reports containing:
             </p>
             
             <div className="space-y-4">

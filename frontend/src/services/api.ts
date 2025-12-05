@@ -20,7 +20,7 @@ export interface Attack {
   severity: 'critical' | 'high' | 'medium' | 'low';
   payload: string;
   collection: string;
-  blocked: boolean;
+  detected: boolean;
   description: string;
 }
 
@@ -206,6 +206,12 @@ export const alertsApi = {
   // Delete recipient
   deleteRecipient: async (id: string): Promise<{ message: string }> => {
     const response = await api.delete(`/api/alerts/recipients/${id}`);
+    return response.data;
+  },
+
+  // Check permissions
+  checkPermissions: async (): Promise<{ canViewReports: boolean; canManageAlerts: boolean }> => {
+    const response = await api.get('/api/alerts/permissions');
     return response.data;
   },
 };

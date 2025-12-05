@@ -12,8 +12,12 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "http://localhost:3002",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+  },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
 });
 
 // Middleware
@@ -35,10 +39,23 @@ app.use('/api/vulnerable', vulnerableRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-  console.log('Frontend client connected:', socket.id);
+  console.log('✅ Frontend client connected:', socket.id);
+  console.log(`   Total connected clients: ${io.sockets.sockets.size}`);
   
-  socket.on('disconnect', () => {
-    console.log('Frontend client disconnected:', socket.id);
+  // Send initial connection confirmation
+  socket.emit('connected', { 
+    message: 'Connected to security monitoring system',
+    socketId: socket.id,
+    timestamp: new Date().toISOString()
+  });
+  
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Frontend client disconnected:', socket.id, 'Reason:', reason);
+    console.log(`   Remaining connected clients: ${io.sockets.sockets.size}`);
+  });
+  
+  socket.on('error', (error) => {
+    console.error('❌ Socket error:', error);
   });
 });
 

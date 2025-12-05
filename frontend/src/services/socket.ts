@@ -14,14 +14,20 @@ class SocketService {
 
   connect() {
     if (this.socket?.connected) {
+      console.log('✅ Socket already connected');
       return;
     }
 
     const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8080';
+    console.log(`🔌 Connecting to socket server at ${socketUrl}`);
     
     this.socket = io(socketUrl, {
-      transports: ['websocket'],
-      timeout: 5000,
+      transports: ['websocket', 'polling'], // Fallback to polling if websocket fails
+      timeout: 10000,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: Infinity,
     });
 
     this.setupEventListeners();
@@ -161,7 +167,8 @@ class SocketService {
 
   // Getters
   get connected(): boolean {
-    return this.isConnected;
+    // Check both our internal state and the actual socket connection
+    return this.isConnected && (this.socket?.connected ?? false);
   }
 
   get socketId(): string | undefined {
